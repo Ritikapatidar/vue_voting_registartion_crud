@@ -46,7 +46,7 @@ function handleSubmit() {
       resetForm()
     }
     else {
-      if (allUsers.value.some((user) => JSON.stringify(user) === JSON.stringify(formData.value))) {
+      if (allUsers.value?.some((user) => JSON.stringify(user) === JSON.stringify(formData.value))) {
         errors.value.sameDataError = "Record already exist!"
       }
       else {
