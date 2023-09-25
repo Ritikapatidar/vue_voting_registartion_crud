@@ -36,17 +36,22 @@ const resetForm = () => {
 }
 function handleSubmit() {
   if (validate(formData.value, errors.value)) {
-
     errors.value.sameDataError = ''
     if (edit.value.isEdit) {
-      allUsers.value[edit.value.editIndex] = formData.value
-      setLocalStorageData(allUsers.value)
-      edit.value.editIndex = -1
-      edit.value.isEdit = false
-      resetForm()
+      let restUser = allUsers.value.filter(user => user !== allUsers.value[edit.value.editIndex])
+      if (restUser.some((user) => user.FirstName.trim() === formData.value.FirstName.trim() && user.LastName.trim() === formData.value.LastName.trim() && user.Age === formData.value.Age && user.Gender === formData.value.Gender && JSON.stringify(formData.value.Hobbies.sort()) === JSON.stringify(user.Hobbies.sort()) && user.DateOfBirth === formData.value.DateOfBirth && user.State === formData.value.State && user.City === formData.value.City)) {
+        errors.value.sameDataError = "Record already exist!"
+      }
+      else {
+        allUsers.value[edit.value.editIndex] = formData.value
+        setLocalStorageData(allUsers.value)
+        edit.value.editIndex = -1
+        edit.value.isEdit = false
+        resetForm()
+      }
     }
     else {
-      if (allUsers.value?.some((user) => JSON.stringify(user) === JSON.stringify(formData.value))) {
+      if (allUsers.value.some((user) => user.FirstName.trim() === formData.value.FirstName.trim() && user.LastName.trim() === formData.value.LastName.trim() && user.Age === formData.value.Age && user.Gender === formData.value.Gender && JSON.stringify(formData.value.Hobbies.sort()) === JSON.stringify(user.Hobbies.sort()) && user.DateOfBirth === formData.value.DateOfBirth && user.State === formData.value.State && user.City === formData.value.City)) {
         errors.value.sameDataError = "Record already exist!"
       }
       else {
@@ -106,12 +111,12 @@ onMounted(() => {
             <span class="formError text-danger" id="LastNameError">{{ errors.LastNameError }}</span>
           </div>
           <div class="row justify-content-between">
-            <div class="form-group mb-2 col-6">
+            <div class="form-group mb-2 col-sm-6">
               <label for="DOB">Date Of Birth</label>
               <input id="DOB" name="DOB" class="form-control" type="date" v-model="formData.DateOfBirth" />
               <span class="formError text-danger" id="DOBError">{{ errors.DOBError }}</span>
             </div>
-            <div class="form-group mb-2 col-6">
+            <div class="form-group mb-2 col-sm-6">
               <label for="Age">Age</label>
               <input id="Age" class="form-control" type="number" v-model="formData.Age" />
               <span class="formError text-danger" id="AgeError">{{ errors.AgeError }}</span>
@@ -164,21 +169,23 @@ onMounted(() => {
             </div>
           </div>
 
-          <div class="form-group mb-3">
-            <label for="State">Select a State</label>
-            <select class="form-select" v-model="formData.State" @change="handleStateChange($event.target.value)">
-              <option value="" disabled selected>Select a State</option>
-              <option :value="state" v-for="state in allStates">{{ state }}</option>
-            </select>
-            <span class="formError text-danger" id="StateError">{{ errors.StateError }}</span>
-          </div>
-          <div class="form-group mb-3">
-            <label for="City">Select a City</label>
-            <select class="form-select" v-model="formData.City">
-              <option value="" selected disabled>Select a City</option>
-              <option :value="city" v-for="city in allCities">{{ city }}</option>
-            </select>
-            <span class="formError text-danger" id="CityError">{{ errors.CityError }}</span>
+          <div class="row justify-content-between">
+            <div class="form-group mb-3 col-sm-6">
+              <label for="State">Select a State</label>
+              <select class="form-select" v-model="formData.State" @change="handleStateChange($event.target.value)">
+                <option value="" disabled selected>Select a State</option>
+                <option :value="state" v-for="state in allStates">{{ state }}</option>
+              </select>
+              <span class="formError text-danger" id="StateError">{{ errors.StateError }}</span>
+            </div>
+            <div class="form-group mb-3 col-sm-6">
+              <label for="City">Select a City</label>
+              <select class="form-select" v-model="formData.City">
+                <option value="" selected disabled>Select a City</option>
+                <option :value="city" v-for="city in allCities">{{ city }}</option>
+              </select>
+              <span class="formError text-danger" id="CityError">{{ errors.CityError }}</span>
+            </div>
           </div>
 
           <button id="btnSubmit" class="btn btn-success text-light">{{ !edit.isEdit ? 'Add' : 'Update' }}</button>
