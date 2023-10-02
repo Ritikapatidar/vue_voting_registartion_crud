@@ -8,40 +8,42 @@ const formData = ref({
   FirstName: '', LastName: '', DateOfBirth: '', Gender: '', Age: '', Hobbies: [], State: '', City: ''
 })
 
-const rules = computed(() => ({
-  FirstName: {
-    required: helpers.withMessage("First Name Can't be Blank *", required),
-    minLength: helpers.withMessage("First Name must contain atleast 3 characters !", minLength(3)),
-    maxLength: helpers.withMessage("First Name must contain atmost 20 characters !", maxLength(20)),
-    containsOnlyCharacters: helpers.withMessage('Only Characters are allowed!', (val) => /^[A-Za-z]+$/.test(val))
-  },
-  LastName: {
-    required: helpers.withMessage("Last Name Can't be Blank *", required),
-    minLength: helpers.withMessage("Last Name must contain atleast 3 characters !", minLength(3)),
-    maxLength: helpers.withMessage("Last Name must contain atmost 20 characters !", maxLength(20)),
-    containsOnlyCharacters: helpers.withMessage('Only Characters are allowed!', (val) => /^[A-Za-z]+$/.test(val))
-  },
-  DateOfBirth: {
-    required: helpers.withMessage("Please Select Date of Birth*", required)
-  },
-  Gender: {
-    required: helpers.withMessage("Please select Gender*", required)
-  },
-  Age: {
-    required: helpers.withMessage("Age Required *", required),
-    minValue: helpers.withMessage("Not Eligible", minValue(18)),
-    maxValue: helpers.withMessage("Not Eligible", maxValue(100)),
-  },
-  Hobbies: {
-    required: helpers.withMessage("Please select hobby*", required)
-  },
-  State: {
-    required: helpers.withMessage("Please Select a State*", required),
-  },
-  City: {
-    required: helpers.withMessage("Please Select a City*", required),
+const rules = computed(() => {
+  return {
+    FirstName: {
+      required: helpers.withMessage("First Name Can't be Blank *", required),
+      minLength: helpers.withMessage("First Name must contain atleast 3 characters !", minLength(3)),
+      maxLength: helpers.withMessage("First Name must contain atmost 20 characters !", maxLength(20)),
+      containsOnlyCharacters: helpers.withMessage('Only Characters are allowed!', (val) => /^[A-Za-z]+$/.test(val))
+    },
+    LastName: {
+      required: helpers.withMessage("Last Name Can't be Blank *", required),
+      minLength: helpers.withMessage("Last Name must contain atleast 3 characters !", minLength(3)),
+      maxLength: helpers.withMessage("Last Name must contain atmost 20 characters !", maxLength(20)),
+      containsOnlyCharacters: helpers.withMessage('Only Characters are allowed!', (val) => /^[A-Za-z]+$/.test(val))
+    },
+    DateOfBirth: {
+      required: helpers.withMessage("Please Select Date of Birth*", required)
+    },
+    Gender: {
+      required: helpers.withMessage("Please select Gender*", required)
+    },
+    Age: {
+      required: helpers.withMessage("Age Required *", required),
+      minValue: helpers.withMessage("Not Eligible", minValue(18)),
+      maxValue: helpers.withMessage("Not Eligible", maxValue(100)),
+    },
+    Hobbies: {
+      required: helpers.withMessage("Please select hobby*", required)
+    },
+    State: {
+      required: helpers.withMessage("Please Select a State*", required),
+    },
+    City: {
+      required: helpers.withMessage("Please Select a City*", required),
+    }
   }
-}))
+})
 
 const v$ = useVuelidate(rules, formData.value)
 const errors = ref({
@@ -55,7 +57,7 @@ const edit = ref({ isEdit: false, editIndex: -1 })
 onMounted(
   () => {
     allStates.value = Object.keys(stateCity).sort()
-    allUsers.value = JSON.parse(localStorage.getItem('voting_userData'))
+    allUsers.value = JSON.parse(localStorage.getItem('voting_userdata'))
   }
 )
 const handleStateChange = (e) => {
@@ -64,18 +66,24 @@ const handleStateChange = (e) => {
 }
 
 const setLocalStorageData = (data) => {
-  localStorage.setItem('voting_userData', JSON.stringify(data))
+  localStorage.setItem('voting_userdata', JSON.stringify(data))
 }
+
 const resetForm = () => {
-  formData.value = {
-    FirstName: '', LastName: '', DateOfBirth: '', Gender: '', Age: '', Hobbies: [], State: '', City: ''
-  }
+  formData.value.FirstName = "",
+    formData.value.LastName = "",
+    formData.value.Age = "",
+    formData.value.Gender = ""
+  formData.value.Hobbies = []
+  formData.value.State = ""
+  formData.value.City = ""
+  formData.value.DateOfBirth = ""
 }
 async function handleSubmit() {
   let res = await v$.value.$validate()
   if (res) {
     errors.value.sameDataError = ''
-    if (edit.value.isEdit) {
+    if (edit.value.editIndex >= 0) {
       let restUser = allUsers.value.filter(user => user !== allUsers.value[edit.value.editIndex])
       if (restUser.some((user) => user.FirstName.trim() === formData.value.FirstName.trim() && user.LastName.trim() === formData.value.LastName.trim() && user.Age === formData.value.Age && user.Gender === formData.value.Gender && JSON.stringify(formData.value.Hobbies.sort()) === JSON.stringify(user.Hobbies.sort()) && user.DateOfBirth === formData.value.DateOfBirth && user.State === formData.value.State && user.City === formData.value.City)) {
         errors.value.sameDataError = "Record already exist!"
@@ -86,6 +94,7 @@ async function handleSubmit() {
         edit.value.editIndex = -1
         edit.value.isEdit = false
         resetForm()
+        v$.value.$reset()
       }
     }
     else {
@@ -93,16 +102,17 @@ async function handleSubmit() {
         errors.value.sameDataError = "Record already exist!"
       }
       else {
-        if (localStorage.getItem('voting_userData')) {
-          setLocalStorageData([formData.value, ...JSON.parse(localStorage.getItem('voting_userData'))])
+        if (localStorage.getItem('voting_userdata')) {
+          setLocalStorageData([formData.value, ...JSON.parse(localStorage.getItem('voting_userdata'))])
         }
         else {
           setLocalStorageData([formData.value])
         }
         resetForm()
+        v$.value.$reset()
       }
     }
-    allUsers.value = JSON.parse(localStorage.getItem('voting_userData'))
+    allUsers.value = JSON.parse(localStorage.getItem('voting_userdata'))
   }
 }
 
@@ -115,6 +125,7 @@ const handleEdit = (index) => {
   edit.value.isEdit = true
   edit.value.editIndex = index
   const editItem = allUsers.value[index]
+
   formData.value.FirstName = editItem.FirstName
   formData.value.LastName = editItem.LastName
   formData.value.DateOfBirth = editItem.DateOfBirth
@@ -127,7 +138,7 @@ const handleEdit = (index) => {
 }
 
 onMounted(() => {
-  allUsers.value = JSON.parse(localStorage.getItem('voting_userData'))
+  allUsers.value = JSON.parse(localStorage.getItem('voting_userdata'))
 })
 </script>
 <template>
@@ -139,12 +150,12 @@ onMounted(() => {
           <span class="formError text-danger" id="SameDataError">{{ errors.sameDataError }}</span>
           <div class="form-group mb-3">
             <label for="firstName">First Name</label>
-            <input class="form-control" type="text" name="firstName" id="FirstName" v-model="formData.FirstName" />
+            <input class="form-control" type="text" name="firstName" id="FirstName" v-model.trim="formData.FirstName" />
             <span class="formError text-danger" id="firstNameError">{{ v$.FirstName.$errors[0]?.$message }}</span>
           </div>
           <div class="form-group mb-3">
             <label for="lastName">Last Name</label>
-            <input class="form-control" type="text" id="lastName" name="LastName" v-model="formData.LastName" />
+            <input class="form-control" type="text" id="lastName" name="LastName" v-model.trim="formData.LastName" />
             <span class="formError text-danger" id="lastNameError">{{ v$.LastName.$errors[0]?.$message }}</span>
           </div>
           <div class="row justify-content-between">
