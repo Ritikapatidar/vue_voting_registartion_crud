@@ -1,14 +1,51 @@
 <script setup>
-import { ref, onMounted } from 'vue';
-import validations from '../composables/validation';
+import { ref, onMounted, computed } from 'vue';
+import { useVuelidate } from '@vuelidate/core'
+import { required, helpers, minLength, maxLength, minValue, maxValue } from '@vuelidate/validators'
 import Table from './Table.vue';
 import stateCity from '../assets/stateCities.json'
-const { validate } = validations()
 const formData = ref({
   FirstName: '', LastName: '', DateOfBirth: '', Gender: '', Age: '', Hobbies: [], State: '', City: ''
 })
+
+const rules = computed(() => ({
+  FirstName: {
+    required: helpers.withMessage("First Name Can't be Blank *", required),
+    minLength: helpers.withMessage("First Name must contain atleast 3 characters !", minLength(3)),
+    maxLength: helpers.withMessage("First Name must contain atmost 20 characters !", maxLength(20)),
+    containsOnlyCharacters: helpers.withMessage('Only Characters are allowed!', (val) => /^[A-Za-z]+$/.test(val))
+  },
+  LastName: {
+    required: helpers.withMessage("Last Name Can't be Blank *", required),
+    minLength: helpers.withMessage("Last Name must contain atleast 3 characters !", minLength(3)),
+    maxLength: helpers.withMessage("Last Name must contain atmost 20 characters !", maxLength(20)),
+    containsOnlyCharacters: helpers.withMessage('Only Characters are allowed!', (val) => /^[A-Za-z]+$/.test(val))
+  },
+  DateOfBirth: {
+    required: helpers.withMessage("Please Select Date of Birth*", required)
+  },
+  Gender: {
+    required: helpers.withMessage("Please select Gender*", required)
+  },
+  Age: {
+    required: helpers.withMessage("Age Required *", required),
+    minValue: helpers.withMessage("Not Eligible", minValue(18)),
+    maxValue: helpers.withMessage("Not Eligible", maxValue(100)),
+  },
+  Hobbies: {
+    required: helpers.withMessage("Please select hobby*", required)
+  },
+  State: {
+    required: helpers.withMessage("Please Select a State*", required),
+  },
+  City: {
+    required: helpers.withMessage("Please Select a City*", required),
+  }
+}))
+
+const v$ = useVuelidate(rules, formData.value)
 const errors = ref({
-  FirstNameError: '', LastNameError: '', DOBError: '', GenderError: '', AgeError: '', HobbiesError: '', StateError: '', CityError: '', sameDataError: ''
+  sameDataError: ''
 })
 const allUsers = ref([])
 const allStates = ref([])
@@ -34,8 +71,9 @@ const resetForm = () => {
     FirstName: '', LastName: '', DateOfBirth: '', Gender: '', Age: '', Hobbies: [], State: '', City: ''
   }
 }
-function handleSubmit() {
-  if (validate(formData.value, errors.value)) {
+async function handleSubmit() {
+  let res = await v$.value.$validate()
+  if (res) {
     errors.value.sameDataError = ''
     if (edit.value.isEdit) {
       let restUser = allUsers.value.filter(user => user !== allUsers.value[edit.value.editIndex])
@@ -77,7 +115,6 @@ const handleEdit = (index) => {
   edit.value.isEdit = true
   edit.value.editIndex = index
   const editItem = allUsers.value[index]
-
   formData.value.FirstName = editItem.FirstName
   formData.value.LastName = editItem.LastName
   formData.value.DateOfBirth = editItem.DateOfBirth
@@ -98,28 +135,28 @@ onMounted(() => {
     <div class="row py-3">
       <h2 class="mx-2">Voting Registration Form</h2>
       <div class="col-12">
-        <form @submit.prevent="handleSubmit" @change="validate(formData, errors)" class="p-3 rounded border">
+        <form @submit.prevent="handleSubmit" class="p-3 rounded border">
           <span class="formError text-danger" id="SameDataError">{{ errors.sameDataError }}</span>
           <div class="form-group mb-3">
             <label for="firstName">First Name</label>
             <input class="form-control" type="text" name="firstName" id="FirstName" v-model="formData.FirstName" />
-            <span class="formError text-danger" id="firstNameError">{{ errors.FirstNameError }}</span>
+            <span class="formError text-danger" id="firstNameError">{{ v$.FirstName.$errors[0]?.$message }}</span>
           </div>
           <div class="form-group mb-3">
             <label for="lastName">Last Name</label>
             <input class="form-control" type="text" id="lastName" name="LastName" v-model="formData.LastName" />
-            <span class="formError text-danger" id="lastNameError">{{ errors.LastNameError }}</span>
+            <span class="formError text-danger" id="lastNameError">{{ v$.LastName.$errors[0]?.$message }}</span>
           </div>
           <div class="row justify-content-between">
             <div class="form-group mb-2 col-sm-6">
               <label for="dateOfBirth">Date Of Birth</label>
               <input id="dateOfBirth" name="DOB" class="form-control" type="date" v-model="formData.DateOfBirth" />
-              <span class="formError text-danger" id="dateOfBirthError">{{ errors.DOBError }}</span>
+              <span class="formError text-danger" id="dateOfBirthError">{{ v$.DateOfBirth.$errors[0]?.$message }}</span>
             </div>
             <div class="form-group mb-2 col-sm-6">
               <label for="age">Age</label>
               <input id="age" class="form-control" type="number" v-model="formData.Age" />
-              <span class="formError text-danger" id="ageError">{{ errors.AgeError }}</span>
+              <span class="formError text-danger" id="ageError">{{ v$.Age.$errors[0]?.$message }}</span>
             </div>
           </div>
           <div class="row justify-content-between">
@@ -153,7 +190,7 @@ onMounted(() => {
                   Reading
                 </label>
               </div>
-              <span class="formError text-danger" id="HobbiesError">{{ errors.HobbiesError }}</span>
+              <span class="formError text-danger" id="HobbiesError">{{ v$.Hobbies.$errors[0]?.$message }}</span>
             </div>
             <div class="form-group mb-2 col-6">
               <label for="Gender">Gender</label>
@@ -165,18 +202,19 @@ onMounted(() => {
                 <input class="form-check-input" id="female" name="Gender" value="Female" type="radio"
                   v-model="formData.Gender" /><label class="form-check-label" for="female">Female</label>
               </div>
-              <span class="formError text-danger" id="GenderError">{{ errors.GenderError }}</span>
+              <span class="formError text-danger" id="GenderError">{{ v$.Gender.$errors[0]?.$message }}</span>
             </div>
           </div>
 
           <div class="row justify-content-between">
             <div class="form-group mb-3 col-sm-6">
               <label for="stateDropdown">Select a State</label>
-              <select  id="stateDropdown" class="form-select" v-model="formData.State" @change="handleStateChange($event.target.value)">
+              <select id="stateDropdown" class="form-select" v-model="formData.State"
+                @change="handleStateChange($event.target.value)">
                 <option value="" disabled selected>Select a State</option>
                 <option :value="state" v-for="state in allStates">{{ state }}</option>
               </select>
-              <span class="formError text-danger" id="stateError">{{ errors.StateError }}</span>
+              <span class="formError text-danger" id="stateError">{{ v$.State.$errors[0]?.$message }}</span>
             </div>
             <div class="form-group mb-3 col-sm-6">
               <label for="cityDropdown">Select a City</label>
@@ -184,11 +222,12 @@ onMounted(() => {
                 <option value="" selected disabled>Select a City</option>
                 <option :value="city" v-for="city in allCities">{{ city }}</option>
               </select>
-              <span class="formError text-danger" id="cityError">{{ errors.CityError }}</span>
+              <span class="formError text-danger" id="cityError">{{ v$.City.$errors[0]?.$message }}</span>
             </div>
           </div>
 
-          <button :id="edit.isEdit ? 'update' : 'submit'" class="btn btn-success text-light">{{ !edit.isEdit ? 'Add' : 'Update' }}</button>
+          <button :id="edit.isEdit ? 'update' : 'submit'" class="btn btn-success text-light">{{ !edit.isEdit ? 'Add' :
+            'Update' }}</button>
         </form>
       </div>
     </div>
