@@ -101,25 +101,25 @@ onMounted(() => {
         <form @submit.prevent="handleSubmit" @change="validate(formData, errors)" class="p-3 rounded border">
           <span class="formError text-danger" id="SameDataError">{{ errors.sameDataError }}</span>
           <div class="form-group mb-3">
-            <label for="FirstName">First Name</label>
-            <input class="form-control" type="text" name="FirstName" id="FirstName" v-model="formData.FirstName" />
-            <span class="formError text-danger" id="FirstNameError">{{ errors.FirstNameError }}</span>
+            <label for="firstName">First Name</label>
+            <input class="form-control" type="text" name="firstName" id="FirstName" v-model="formData.FirstName" />
+            <span class="formError text-danger" id="firstNameError">{{ errors.FirstNameError }}</span>
           </div>
           <div class="form-group mb-3">
-            <label for="LastName">Last Name</label>
-            <input id="LastName" class="form-control" type="text" name="LastName" v-model="formData.LastName" />
-            <span class="formError text-danger" id="LastNameError">{{ errors.LastNameError }}</span>
+            <label for="lastName">Last Name</label>
+            <input class="form-control" type="text" id="lastName" name="LastName" v-model="formData.LastName" />
+            <span class="formError text-danger" id="lastNameError">{{ errors.LastNameError }}</span>
           </div>
           <div class="row justify-content-between">
             <div class="form-group mb-2 col-sm-6">
-              <label for="DOB">Date Of Birth</label>
-              <input id="DOB" name="DOB" class="form-control" type="date" v-model="formData.DateOfBirth" />
-              <span class="formError text-danger" id="DOBError">{{ errors.DOBError }}</span>
+              <label for="dateOfBirth">Date Of Birth</label>
+              <input id="dateOfBirth" name="DOB" class="form-control" type="date" v-model="formData.DateOfBirth" />
+              <span class="formError text-danger" id="dateOfBirthError">{{ errors.DOBError }}</span>
             </div>
             <div class="form-group mb-2 col-sm-6">
-              <label for="Age">Age</label>
-              <input id="Age" class="form-control" type="number" v-model="formData.Age" />
-              <span class="formError text-danger" id="AgeError">{{ errors.AgeError }}</span>
+              <label for="age">Age</label>
+              <input id="age" class="form-control" type="number" v-model="formData.Age" />
+              <span class="formError text-danger" id="ageError">{{ errors.AgeError }}</span>
             </div>
           </div>
           <div class="row justify-content-between">
@@ -158,12 +158,12 @@ onMounted(() => {
             <div class="form-group mb-2 col-6">
               <label for="Gender">Gender</label>
               <div class="form-check">
-                <input class="form-check-input" id="Male" name="Gender" value="Male" type="radio"
-                  v-model="formData.Gender" /><label class="form-check-label" for="Male">Male</label>
+                <input class="form-check-input" id="male" name="Gender" value="Male" type="radio"
+                  v-model="formData.Gender" /><label class="form-check-label" for="male">Male</label>
               </div>
               <div class="form-check">
-                <input class="form-check-input" id="Female" name="Gender" value="Female" type="radio"
-                  v-model="formData.Gender" /><label class="form-check-label" for="Female">Female</label>
+                <input class="form-check-input" id="female" name="Gender" value="Female" type="radio"
+                  v-model="formData.Gender" /><label class="form-check-label" for="female">Female</label>
               </div>
               <span class="formError text-danger" id="GenderError">{{ errors.GenderError }}</span>
             </div>
@@ -171,24 +171,24 @@ onMounted(() => {
 
           <div class="row justify-content-between">
             <div class="form-group mb-3 col-sm-6">
-              <label for="State">Select a State</label>
-              <select class="form-select" v-model="formData.State" @change="handleStateChange($event.target.value)">
+              <label for="stateDropdown">Select a State</label>
+              <select  id="stateDropdown" class="form-select" v-model="formData.State" @change="handleStateChange($event.target.value)">
                 <option value="" disabled selected>Select a State</option>
                 <option :value="state" v-for="state in allStates">{{ state }}</option>
               </select>
-              <span class="formError text-danger" id="StateError">{{ errors.StateError }}</span>
+              <span class="formError text-danger" id="stateError">{{ errors.StateError }}</span>
             </div>
             <div class="form-group mb-3 col-sm-6">
-              <label for="City">Select a City</label>
-              <select class="form-select" v-model="formData.City">
+              <label for="cityDropdown">Select a City</label>
+              <select id="cityDropdown" class="form-select" v-model="formData.City">
                 <option value="" selected disabled>Select a City</option>
                 <option :value="city" v-for="city in allCities">{{ city }}</option>
               </select>
-              <span class="formError text-danger" id="CityError">{{ errors.CityError }}</span>
+              <span class="formError text-danger" id="cityError">{{ errors.CityError }}</span>
             </div>
           </div>
 
-          <button id="btnSubmit" class="btn btn-success text-light">{{ !edit.isEdit ? 'Add' : 'Update' }}</button>
+          <button :id="edit.isEdit ? 'update' : 'submit'" class="btn btn-success text-light">{{ !edit.isEdit ? 'Add' : 'Update' }}</button>
         </form>
       </div>
     </div>

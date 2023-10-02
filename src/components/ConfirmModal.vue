@@ -16,7 +16,7 @@ const handleDel = () => {
                             <h4 class="text-center">Are you sure, you want to delete this record!</h4>
                         </div>
                         <div class="card-footer d-flex justify-content-end">
-                            <button class="btn btn-primary me-2" @click="handleDel">
+                            <button class="btn btn-primary me-2" @click="handleDel" id="confirm">
                                 OK
                             </button>
                             <button class="btn btn-secondary" @click="closeDeleteModal">

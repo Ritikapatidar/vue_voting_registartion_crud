@@ -31,14 +31,17 @@ const closeDeleteModal = () => {
                             <template v-if="k === 'Hobbies'">{{ val.toString() }}</template>
                             <template v-else>{{ val }}</template>
                         </td>
-                        <td><button class="btn btn-success" style="font-size: 14px;" @click="handleEdit(key)">Edit <i
+                        <td><button class="btn btn-success" style="font-size: 14px;"
+                                :id="`${value.FirstName}-${value.LastName}-edit`" @click="handleEdit(key)">Edit <i
                                     class="bi bi-pencil-fill"></i></button></td>
-                        <td><button class="btn btn-danger" style="font-size: 14px;" @click="handleDeleteModal(key)">Delete <i
-                            class="bi bi-trash"></i></button></td>
+                        <td><button class="btn btn-danger" style="font-size: 14px;"
+                                :id="`${value.FirstName}-${value.LastName}-delete`" @click="handleDeleteModal(key)">Delete
+                                <i class="bi bi-trash"></i></button></td>
                     </tr>
                 </tbody>
             </table>
         </div>
     </div>
     <ConfirmModal v-if="isDeleteModal" :closeDeleteModal="closeDeleteModal" :handleDelete="handleDelete"
-        :deleteIndex="deleteIndex" /></template>
+        :deleteIndex="deleteIndex" />
+</template>
